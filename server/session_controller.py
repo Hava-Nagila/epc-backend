@@ -22,11 +22,13 @@ class SessionController:
         data = self.__receive(header.data_length)
 
         if header.event == Event.INIT_SESSION:
-            self.__on_init_session(data)
+            pass
         elif header.event == Event.BUS_DETECTION:
-            self.__on_bus_detection(data)
+            image = Data.decode_image(data)
+            self.session.push_task(Task(Event.BUS_DETECTION, image))
         elif header.event == Event.BUS_ROUTE_NUMBER_RECOGNITION:
-            self.__on_bus_route_number_recognition(data)
+            image = Data.decode_image(data)
+            self.session.push_task(Task(Event.BUS_ROUTE_NUMBER_RECOGNITION, image))
 
     def __receive(self, length: int):
         result = b''
@@ -48,18 +50,6 @@ class SessionController:
                 self.connection.send(header.to_bytes())
         except (ConnectionResetError, ConnectionAbortedError):
             return
-
-    # Network event handlers ===========================================================================================
-    def __on_init_session(self, data):
-        pass
-
-    def __on_bus_detection(self, data):
-        image = Data.decode_image(data)
-        self.session.push_task(Task(Event.BUS_DETECTION, image))
-
-    def __on_bus_route_number_recognition(self, data):
-        image = Data.decode_image(data)
-        self.session.push_task(Task(Event.BUS_ROUTE_NUMBER_RECOGNITION, image))
 
     # Session message handlers =========================================================================================
     def __session_callback(self, message: SessionMessage):
