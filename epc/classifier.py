@@ -17,6 +17,10 @@ feats = [
 ]
 
 
+def prediction_model():
+    return RandomForestRegressor(n_estimators=20, random_state=0)
+
+
 class PassportPredictor(Predictor):
     def classify(self, file_path: Path) -> dict:
         df = pd.read_csv(Path(__file__) / "processed" / "pcs.csv", header=0)
@@ -28,7 +32,7 @@ class PassportPredictor(Predictor):
 
         passport = read_docx(file_path)
 
-        inp = [[
+        inputs = [[
             passport.hours_cnt,
             passport.hours_prac,
             passport.online,
@@ -36,15 +40,14 @@ class PassportPredictor(Predictor):
             passport.min_listeners,
             passport.max_listeners
         ]]
-
-        result = {}
-        for target in [
-            'taxonomy',
-            'positive_reviews',
-            'neutral_reviews',
-            'negative_reviews'
-        ]:
-            result[target] = RandomForestRegressor(n_estimators=20, random_state=0) \
-                .fit(df[feats], df[target]) \
-                .predict(inp)
-        return result
+        return {
+            target: prediction_model() \
+                .fit(df[feats], df[target])
+                .predict(inputs)
+            for target in [
+                'taxonomy',
+                'positive_reviews',
+                'neutral_reviews',
+                'negative_reviews'
+            ]
+        }
