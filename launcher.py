@@ -10,11 +10,6 @@ class Launcher(object):
 
     @staticmethod
     def __get_argument_parser() -> argparse.ArgumentParser:
-        """
-        Returns argument parser
-        :return: argument parser
-        """
-
         parser = argparse.ArgumentParser()
         # Required arguments
         parser.add_argument(
@@ -28,10 +23,6 @@ class Launcher(object):
         return parser
 
     def run(self):
-        """
-        Starts the server
-        """
-
         self.server.run()
 
 

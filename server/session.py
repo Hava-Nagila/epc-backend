@@ -43,7 +43,7 @@ class Session(Publisher):
             if task:
                 self.broadcast(PassportMessage(
                     PassportPredictor().classify(
-                        predefined_values[task.data]["file_path"]
+                        predefined_values[task.data]["taxonomy"]
                     )
                 ))
 
