@@ -33,7 +33,9 @@ class SessionController:
         return result
 
     def __session_callback(self, message: PassportMessage):
-        self.connection.send(message.passport['taxonomy'].to_bytes(byteorder='little'))
+        self.connection.send(int(
+            message.passport['taxonomy'] * 10 ** 6
+        ).to_bytes(4, byteorder='little'))
 
     def run(self):
         """

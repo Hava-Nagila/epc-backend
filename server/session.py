@@ -4,7 +4,6 @@ from collections import deque
 from typing import Final
 
 from common.event.publisher import Publisher
-from epc.passport_predictor import PassportPredictor
 from epc.processed.transient import predefined_values
 from server.message import PassportMessage
 from server.task import Task
@@ -40,12 +39,11 @@ class Session(Publisher):
                 task = self.__tasks.pop()
             except IndexError:  # TODO: Remove this if never happens
                 continue
-            if task:
-                self.broadcast(PassportMessage(
-                    PassportPredictor().classify(
-                        predefined_values[task.data]["taxonomy"]
-                    )
-                ))
+            try:
+                if task:
+                    self.broadcast(PassportMessage(predefined_values[task.data]))
+            except Exception as e:
+                print(e)
 
     def __remove_old_tasks(self):
         self.__tasks_mutex.acquire()
