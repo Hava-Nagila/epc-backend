@@ -1,15 +1,16 @@
 import re
 from pathlib import Path
+from typing import Optional
 
 from docx import Document
 from natasha import Doc, Segmenter, MorphVocab, NewsEmbedding, NewsMorphTagger
 
 from epc.processed.difficulties import difficulties
-from processed.ids import all_ids
-from processed.names_to_taxs import names_to_taxs
-from processed.reflection_tones import reflection_tones
-from processed.reflections import all_reflections
-from processed.taxonomies import all_taxonomies
+from epc.processed.ids import all_ids
+from epc.processed.names_to_taxs import names_to_taxs
+from epc.processed.reflection_tones import reflection_tones
+from epc.processed.reflections import all_reflections
+from epc.processed.taxonomies import all_taxonomies
 from server.models import Passport
 
 segmenter = Segmenter()
@@ -48,7 +49,7 @@ def prepare_from(dir_path: Path, out_file: Path):
         out_f.write("]")
 
 
-def read_docx(file_name: Path) -> Passport:
+def read_docx(file_name: Path) -> Optional[Passport]:
     document = Document(str(file_name))
     passport = Passport(str(file_name))
     try:
@@ -61,15 +62,15 @@ def read_docx(file_name: Path) -> Passport:
                 clean_nam = row.cells[1].text.strip().lower()
                 clean_val = row.cells[2].text.strip().lower()
 
-                if (num_cell == "2.1" or "название" in clean_nam) \
-                    and not passport.prog_name:
+                if (
+                    num_cell == "2.1" or "название" in clean_nam
+                ) and not passport.prog_name:
                     doc = Doc(clean_val)
                     doc.segment(segmenter)
                     doc.tag_morph(morph_tagger)
                     for token in doc.tokens:
                         token.lemmatize(morph_vocab)
-                    passport.prog_name = " ".join(
-                        t.lemma.lower() for t in doc.tokens)
+                    passport.prog_name = " ".join(t.lemma.lower() for t in doc.tokens)
                 elif "час" in clean_nam and not passport.hours_cnt:
                     for g in re.findall(r"(\d+)", clean_val):
                         passport.hours_cnt += int(g)
@@ -132,8 +133,8 @@ def read_docx(file_name: Path) -> Passport:
 
     try:
         passport.expected_taxonomy_match = len(
-            names_to_taxs.get(passport.prog_name,
-                              passport.taxonomies) & passport.taxonomies
+            names_to_taxs.get(passport.prog_name, passport.taxonomies)
+            & passport.taxonomies
         ) / len(passport.taxonomies)
     except:
         passport.expected_taxonomy_match = 1

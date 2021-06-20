@@ -28,20 +28,22 @@ def json_to_csv():
     out.writerow(head)
 
     for d in data:
-        out.writerow([
-            d["prog_name"],
-            d["hours_total"],
-            d["hours_prac"],
-            d["online"],
-            d["difficulty"],
-            d["min_listeners"],
-            d["max_listeners"],
-            d["taxonomy"],
-            d["expected_taxonomy_match"],
-            d["positive_reviews"],
-            d["neutral_reviews"],
-            d["negative_reviews"]
-        ])
+        out.writerow(
+            [
+                d["prog_name"],
+                d["hours_total"],
+                d["hours_prac"],
+                d["online"],
+                d["difficulty"],
+                d["min_listeners"],
+                d["max_listeners"],
+                d["taxonomy"],
+                d["expected_taxonomy_match"],
+                d["positive_reviews"],
+                d["neutral_reviews"],
+                d["negative_reviews"],
+            ]
+        )
 
 
 json_to_csv()

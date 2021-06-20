@@ -1,12 +1,13 @@
-import logging
 import threading
 import time
 from collections import deque
 from typing import Final
 
 from common.event.publisher import Publisher
-from server import Task
-from server.network import Event
+from epc.passport_predictor import PassportPredictor
+from epc.processed.transient import predefined_values
+from server.message import PassportMessage
+from server.task import Task
 
 
 class Session(Publisher):
@@ -16,15 +17,12 @@ class Session(Publisher):
     def __init__(self):
         super().__init__()
 
-        self.logger = logging.getLogger('root')
-
         self.__close_flag = False
 
         self.__tasks = deque(maxlen=self.TASKS_DEQUE_MAXIMUM_LENGTH)
         self.__tasks_semaphore = threading.Semaphore(0)
         self.__tasks_mutex = threading.Lock()
         self.__thread = threading.Thread(target=self.__run)
-        self.logger.info('Session initialized')
 
         self.__thread.start()
 
@@ -41,14 +39,13 @@ class Session(Publisher):
             try:
                 task = self.__tasks.pop()
             except IndexError:  # TODO: Remove this if never happens
-                self.logger.error('Session synchronisation error')
                 continue
-            if task.event == Event.BUS_DETECTION:
-                self.__run_bus_detection_pipeline(task.image)
-            elif task.event == Event.BUS_ROUTE_NUMBER_RECOGNITION:
-                self.__run_bus_route_number_recognition_pipeline(task.image)
-            elif task.event == Event.BUS_DOOR_DETECTION:
-                self.__run_bus_route_number_recognition_pipeline(task.image)
+            if task:
+                self.broadcast(PassportMessage(
+                    PassportPredictor().classify(
+                        predefined_values[task.data]["file_path"]
+                    )
+                ))
 
     def __remove_old_tasks(self):
         self.__tasks_mutex.acquire()
@@ -64,7 +61,6 @@ class Session(Publisher):
         :param task: Task to do
         :return: none
         """
-        self.logger.info('Push task -> ' + str(task.event))
         self.__tasks_mutex.acquire()
         is_need_to_semaphore_release = False
         if len(self.__tasks) < 8:

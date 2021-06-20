@@ -1,10 +1,7 @@
 import time
 
-from server.network.event import Event
-
 
 class Task:
-    def __init__(self, event: Event, image: np.ndarray = None):
-        self.event = event
-        self.image = image
+    def __init__(self, data: bytes = None):
+        self.data = int.from_bytes(data, byteorder='little')
         self.creation_time = time.time()

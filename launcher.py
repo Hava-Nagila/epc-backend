@@ -6,7 +6,7 @@ from server.tcpserver import TCPServer
 class Launcher(object):
     def __init__(self):
         args = self.__get_argument_parser().parse_args()
-        self.server = TCPServer('', args.port)
+        self.server = TCPServer("", args.port)
 
     @staticmethod
     def __get_argument_parser() -> argparse.ArgumentParser:
@@ -17,7 +17,13 @@ class Launcher(object):
 
         parser = argparse.ArgumentParser()
         # Required arguments
-        parser.add_argument("port", type=int, action="store", choices=range(0, 65535), help="Server port number")
+        parser.add_argument(
+            "port",
+            type=int,
+            action="store",
+            choices=range(0, 65535),
+            help="Server port number",
+        )
 
         return parser
 

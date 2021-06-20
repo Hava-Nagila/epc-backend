@@ -1,2 +1,2 @@
-from .bus_box_message import BusBoxMessage
+from .passport_message import PassportMessage
 from .session_message import SessionMessage
